@@ -147,11 +147,11 @@ namespace WindowsFormsApplication1
                     //czy istnieje już taki
                     if (list.Exists(x => x.UserName == userName))
                     {
-                        list.Find(x => x.UserName == userName).SetPrivileges(privilegeType, isGrantable);
+                        //list.Find(x => x.UserName == userName).SetPrivileges(privilegeType, isGrantable);
                     }
                     else //utworz jak nie istnieje
                     {
-                        list.Add(new Grantee(userName, privilegeType, isGrantable));
+                        //list.Add(new Grantee(userName, privilegeType, isGrantable));
                     }
                 }
 
@@ -179,7 +179,7 @@ namespace WindowsFormsApplication1
                 myConnection.Open();
                 MySqlCommand cmd = myConnection.CreateCommand();
 
-                cmd.CommandText = string.Format("SELECT GRANTEE, PRIVILEGE_TYPE, IS_GRANTABLE FROM uprawnienia.user_privileges WHERE TABLE_NAME = '{0}';", tableName);
+                cmd.CommandText = string.Format("SELECT GRANTEE, PRIVILEGE_TYPE, IS_GRANTABLE, RECEIVED_FROM FROM uprawnienia.user_privileges WHERE TABLE_NAME = '{0}';", tableName);
 
               //  try
             //    {
@@ -190,15 +190,16 @@ namespace WindowsFormsApplication1
                         String privilegeType = myReader.GetString(1);
                         String isGrantable = myReader.GetString(2);
                         String table = tableName;//myReader.GetString(1);
+                        String from = myReader.GetString(3);
 
                         //czy istnieje już taki
                         if (list.Exists(x => x.UserName == userName))
                         {
-                            list.Find(x => x.UserName == userName).SetPrivileges(privilegeType, isGrantable);
+                            list.Find(x => x.UserName == userName).SetPrivileges(privilegeType, isGrantable, from);
                         }
                         else //utworz jak nie istnieje
                         {
-                            list.Add(new Grantee(userName, privilegeType, isGrantable));
+                            list.Add(new Grantee(userName, privilegeType, isGrantable, from));
                         }  
                     }
 

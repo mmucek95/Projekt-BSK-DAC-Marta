@@ -10,6 +10,7 @@ namespace WindowsFormsApplication1
     {
         public Grantee(String name) 
         {
+            fromWho = new Dictionary<string, string>();
             this.UserName = name;
 
             this.Select = false;
@@ -26,8 +27,9 @@ namespace WindowsFormsApplication1
 
         }
 
-        public Grantee(String name, String privilege, String grantable)
+        public Grantee(String name, String privilege, String grantable, String from)
         {
+            fromWho = new Dictionary<string, string>();
             this.UserName = name;
 
             this.Select = false;
@@ -43,7 +45,7 @@ namespace WindowsFormsApplication1
             this.TakeOverIsGrantable = false;
             
 
-            SetPrivileges(privilege, grantable);
+            SetPrivileges(privilege, grantable, from);
 
         }
 
@@ -61,7 +63,8 @@ namespace WindowsFormsApplication1
         public bool DeleteIsGrantable { get; set; }
         public bool InsertIsGrantable { get; set; }
         public bool TakeOverIsGrantable { get; set; }
-        public void SetPrivileges(String privileges, String grantable)
+        public Dictionary<string, string> fromWho;
+        public void SetPrivileges(String privileges, String grantable, String from)
         {
             //zamian YES/NO na true/false
             bool value = (grantable == "YES") ? true : false;
@@ -73,26 +76,31 @@ namespace WindowsFormsApplication1
             {
                 this.Select = true;
                 this.SelectIsGrantable = value;
+                fromWho.Add("Select", from);
             }
             else if (privileges == "UPDATE")
             {
                 this.Update = true;
                 this.UpdateIsGrantable = value;
+                fromWho.Add("Update", from);
             }
             else if (privileges == "DELETE")
             {
                 this.Delete = true;
                 this.DeleteIsGrantable = value;
+                fromWho.Add("Delete", from);
             }
             else if (privileges == "INSERT")
             {
                 this.Insert = true;
                 this.InsertIsGrantable = value;
+                fromWho.Add("Insert", from);
             }
             else if(privileges =="TAKEOVER")
             {
                 this.TakeOver = true;
                 this.TakeOverIsGrantable = value;
+                fromWho.Add("TakeOver", from);
             }
         }
 

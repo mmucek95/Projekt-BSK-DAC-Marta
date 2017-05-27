@@ -366,9 +366,32 @@ namespace WindowsFormsApplication1
                 button2.Enabled = false;
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void takeBackPrivilege(string userName, string privilege, string tableName)//kto traci, co traci, gdzie traci
         {
             string connectionString = string.Format("Server={0}; Port={1}; database={2}; UID={3}; password={4};", connection.Server, connection.Port, connection.DatabaseName, connection.Login, connection.Password);
+            MySqlConnection myConnection = new MySqlConnection(connectionString);
+            MySqlCommand cmd1 = myConnection.CreateCommand();
+            var usersPrivileges = connection.GetTablePrivilegesAllUsers(tableName);
+            if(privilege == "SELECT")
+            {
+                foreach (var user in usersPrivileges)//sprawdzamy uprawnienia każdego użytkownika
+                {
+                    if(user.Select && user.fromWho["Select"]==userName)//jeżeli użytkownik ma uprawnienie i ma je ode mnie
+                    {
+                        takeBackPrivilege(user.UserName, privilege, tableName);
+                    }
+                }
+                myConnection.Open();
+                cmd1.CommandText = string.Format("DELETE FROM uprawnienia.user_privileges WHERE GRANTEE = \"{0}\" AND TABLE_NAME = '{1}' AND PRIVILEGE_TYPE = '{2}';",
+                userName, tableName, privilege); //usuwamy swoje uprawnienie
+                cmd1.ExecuteReader();
+                myConnection.Close();
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+           /* string connectionString = string.Format("Server={0}; Port={1}; database={2}; UID={3}; password={4};", connection.Server, connection.Port, connection.DatabaseName, connection.Login, connection.Password);
             MySqlConnection myConnection = new MySqlConnection(connectionString);
             myConnection.Open();
             String userName = "'" + dataGridView2.CurrentCell.Value.ToString() + "'@'%'";
@@ -401,7 +424,7 @@ namespace WindowsFormsApplication1
             cmd1.CommandText = string.Format("DELETE FROM uprawnienia.user_privileges WHERE GRANTEE = \"{0}\" AND TABLE_NAME = '{1}'; ", userName, dataGridView1.CurrentCell.Value.ToString());
             cmd1.ExecuteReader();
             myConnection.Close();
-            disableChceckboxes();
+            disableChceckboxes();*/
         }
     }
 }
