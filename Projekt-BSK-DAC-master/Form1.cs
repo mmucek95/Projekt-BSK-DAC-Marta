@@ -374,6 +374,7 @@ namespace WindowsFormsApplication1
             var usersPrivileges = connection.GetTablePrivilegesAllUsers(tableName);
             if(privilege == "SELECT")
             {
+                if(connection.myPrivileges.SelectIsGrantable) //jeżeli możemy nadawać uprawnienia
                 foreach (var user in usersPrivileges)//sprawdzamy uprawnienia każdego użytkownika
                 {
                     if(user.Select && user.fromWho["Select"]==userName)//jeżeli użytkownik ma uprawnienie i ma je ode mnie
@@ -381,12 +382,62 @@ namespace WindowsFormsApplication1
                         takeBackPrivilege(user.UserName, privilege, tableName);
                     }
                 }
+            }
+            else if (privilege == "INSERT")
+            {
+                if (connection.myPrivileges.InsertIsGrantable) //jeżeli możemy nadawać uprawnienia
+                    foreach (var user in usersPrivileges)//sprawdzamy uprawnienia każdego użytkownika
+                    {
+                        if (user.Insert && user.fromWho["Insert"] == userName)//jeżeli użytkownik ma uprawnienie i ma je ode mnie
+                        {
+                            takeBackPrivilege(user.UserName, privilege, tableName);
+                        }
+                    }
+            }
+            else if (privilege == "DELETE")
+            {
+                if (connection.myPrivileges.DeleteIsGrantable) //jeżeli możemy nadawać uprawnienia
+                    foreach (var user in usersPrivileges)//sprawdzamy uprawnienia każdego użytkownika
+                    {
+                        if (user.Delete && user.fromWho["Delete"] == userName)//jeżeli użytkownik ma uprawnienie i ma je ode mnie
+                        {
+                            takeBackPrivilege(user.UserName, privilege, tableName);
+                        }
+                    }
+            }
+            else if (privilege == "UPDATE")
+            {
+                if (connection.myPrivileges.UpdateIsGrantable) //jeżeli możemy nadawać uprawnienia
+                    foreach (var user in usersPrivileges)//sprawdzamy uprawnienia każdego użytkownika
+                    {
+                        if (user.Update && user.fromWho["Update"] == userName)//jeżeli użytkownik ma uprawnienie i ma je ode mnie
+                        {
+                            takeBackPrivilege(user.UserName, privilege, tableName);
+                        }
+                    }
+            }
+            else if(privilege =="TAKEOVER")
+            {
+                if (connection.myPrivileges.UpdateIsGrantable) //jeżeli możemy nadawać uprawnienia
+                    foreach (var user in usersPrivileges)//sprawdzamy uprawnienia każdego użytkownika
+                    {
+                        if (user.Update && user.fromWho["Update"] == userName)//jeżeli użytkownik ma uprawnienie i ma je ode mnie
+                        {
+                            takeBackPrivilege(user.UserName, privilege, tableName);
+                        }
+                    }
                 myConnection.Open();
-                cmd1.CommandText = string.Format("DELETE FROM uprawnienia.user_privileges WHERE GRANTEE = \"{0}\" AND TABLE_NAME = '{1}' AND PRIVILEGE_TYPE = '{2}';",
-                userName, tableName, privilege); //usuwamy swoje uprawnienie
+                cmd1.CommandText = string.Format("DELETE FROM uprawnienia.user_privileges WHERE GRANTEE = \"{0}\" AND PRIVILEGE_TYPE = '{1}';",
+                userName, tableName, privilege); //usuwamy swoje uprawnienie z każdej tabeli, ponieważ dotyczy to przejmowania, które jest globalne
                 cmd1.ExecuteReader();
                 myConnection.Close();
+                return;
             }
+            myConnection.Open();
+            cmd1.CommandText = string.Format("DELETE FROM uprawnienia.user_privileges WHERE GRANTEE = \"{0}\" AND TABLE_NAME = '{1}' AND PRIVILEGE_TYPE = '{2}';",
+            userName, tableName, privilege); //usuwamy swoje uprawnienie
+            cmd1.ExecuteReader();
+            myConnection.Close();
         }
 
         private void button2_Click(object sender, EventArgs e)
